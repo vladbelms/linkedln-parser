@@ -1,0 +1,2 @@
+class Linkedln:
+    pass

@@ -1,0 +1,32 @@
+[tool.poetry]
+name = 'linkedln_parser'
+version = '0.1.0'
+description = 'job parser for Linkedln'
+authors = ['Cristiano Ronaldo <vladbelms@gmail.com>']
+license = 'MIT'
+readme = 'README.md'
+repository = 'https://github.com/vladbelms/linkedln-parser'
+homepage = 'https://github.com/vladbelms/linkedln-parser'
+classifiers = [
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Customer Service',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3 :: Only',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: MacOS'
+]
+packages = [{ include = 'linkedln_parser' }]
+
+[tool.poetry.dependencies]
+python = '^3.11'
+loguru = "^0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.1"
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ['poetry-core']
+build-backend = 'poetry.core.masonry.api'
