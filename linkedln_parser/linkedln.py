@@ -41,10 +41,8 @@ class Linkedln:
         results = self.parse_html()
         country_companies = results.find_all("h4", class_="base-search-card__subtitle")
         for name_company in country_companies:
-            self.add_dict_values("name company",name_company.get_text(strip=True))
+            self.add_dict_values("name company", name_company.get_text(strip=True))
             self.my_list.append(self.my_dict)
-
-
 
     def return_list(self) -> list[dict[str: str]]:
         return self.my_list
