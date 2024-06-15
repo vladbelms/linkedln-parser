@@ -2,10 +2,8 @@ from linkedln_parser import Linkedln
 
 
 def main():
-    url = Linkedln(["ml"], ["USA"])
-    url.parse_name_companies()
-    url.parse_country_companies()
-    print(url.return_list())
+    url = Linkedln([""], ["USA"])
+    print(url.get_data(5))
 
 
 if __name__ == '__main__':
