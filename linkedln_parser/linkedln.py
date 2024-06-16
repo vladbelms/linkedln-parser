@@ -10,7 +10,7 @@ class Linkedln:
         self.__location = location
 
     @property
-    def description(self):
+    def keywords(self):
         return self.__keywords
 
     @property
@@ -21,14 +21,14 @@ class Linkedln:
         link = f"https://www.linkedin.com/jobs/search?keywords={'%20'.join(self.__keywords)}&location={'%20'.join(self.__location)}trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0"
         page = httpx.get(link)
         results = BeautifulSoup(page.content, "html.parser")
-        parse_list = []
+        list_ = []
         job_titles = results.find_all("h3", class_="base-search-card__title")
-        country_companies = results.find_all("h4", class_="base-search-card__subtitle")
+        company_contries = results.find_all("h4", class_="base-search-card__subtitle")
         job_titles = job_titles[:count]
-        country_companies = country_companies[:count]
-        for job_title, name_company in zip(job_titles, country_companies):
-            parse_list.append({
-                "job title": job_title.get_text(strip=True),
-                "name company": name_company.get_text(strip=True)
+        company_contries = company_contries[:count]
+        for job_title, name_company in zip(job_titles, company_contries):
+            list_.append({
+                "job_title": job_title.get_text(strip=True),
+                "name_company": name_company.get_text(strip=True)
             })
-        return parse_list
+        return list_
