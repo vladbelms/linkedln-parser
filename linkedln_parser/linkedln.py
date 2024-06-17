@@ -24,11 +24,14 @@ class Linkedln:
         list_ = []
         job_titles = results.find_all("h3", class_="base-search-card__title")
         company_contries = results.find_all("h4", class_="base-search-card__subtitle")
+        datetimes = results.find_all("time", class_="job-search-card__listdate")
         job_titles = job_titles[:count]
         company_contries = company_contries[:count]
-        for job_title, name_company in zip(job_titles, company_contries):
+        datetimes = datetimes[:count]
+        for job_title, name_company, date in zip(job_titles, company_contries,datetimes):
             list_.append({
                 "job_title": job_title.get_text(strip=True),
-                "name_company": name_company.get_text(strip=True)
+                "name_company": name_company.get_text(strip=True),
+                "datetime": date['datetime']
             })
         return list_
