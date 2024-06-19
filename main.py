@@ -1,9 +1,11 @@
-from linkedln_parser import Linkedln
+from src import Menu, Linkedln
 
 
 def main():
+    number = Menu.get_positive_number()
     url = Linkedln([""], ["USA"])
-    print(url.get_data(5))
+    list_ = url.get_data(number)
+    Menu.get_list(list_)
 
 
 if __name__ == '__main__':
