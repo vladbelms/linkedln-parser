@@ -2,11 +2,12 @@ from src import Menu, Linkedln
 
 
 def main():
-    Menu.present("Linkedln Parser")
-    number = Menu.get_data("Print a positive number")
+    menu = Menu()
+    menu.show_base_info("Linkedln Parser")
+    number = menu.get_menu_data("Print a positive number")
     url = Linkedln([""], ["USA"])
-    list_ = url.get_data(number)
-    Menu.get_list(list_)
+    list_ = url.get_linkedln_data(number)
+    menu.show_list(list_)
 
 
 if __name__ == '__main__':

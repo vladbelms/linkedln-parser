@@ -2,8 +2,7 @@ from blessed import Terminal
 
 
 class Menu:
-    @staticmethod
-    def present(project_name):
+    def show_base_info(self, project_name: str) -> None:
         term = Terminal()
         with term.fullscreen(), term.cbreak():
             print(term.home + term.clear)
@@ -11,8 +10,7 @@ class Menu:
             print("\n\n" + term.italic + "Press any key to exit..." + term.no_italic)
             term.inkey()
 
-    @staticmethod
-    def get_data(promt : str) -> int:
+    def get_menu_data(self, promt: str) -> int:
         term = Terminal()
         print(term.clear)
         with term.cbreak():
@@ -29,8 +27,7 @@ class Menu:
                     break
         return int(number)
 
-    @staticmethod
-    def get_list(list_: list) -> None:
+    def show_list(self, list_: list) -> None:
 
         term = Terminal()
         with term.fullscreen(), term.cbreak():
