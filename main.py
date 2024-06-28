@@ -2,7 +2,8 @@ from src import Menu, Linkedln
 
 
 def main():
-    number = Menu.get_positive_number()
+    Menu.present("Linkedln Parser")
+    number = Menu.get_data("Print a positive number")
     url = Linkedln([""], ["USA"])
     list_ = url.get_data(number)
     Menu.get_list(list_)

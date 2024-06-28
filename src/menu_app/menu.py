@@ -3,14 +3,20 @@ from blessed import Terminal
 
 class Menu:
     @staticmethod
-    def get_positive_number() -> int:
+    def present(project_name):
+        term = Terminal()
+        with term.fullscreen(), term.cbreak():
+            print(term.home + term.clear)
+            print(f"{term.bold}it's a {project_name}{term.normal}")
+            print("\n\n" + term.italic + "Press any key to exit..." + term.no_italic)
+            term.inkey()
+
+    @staticmethod
+    def get_data(promt : str) -> int:
         term = Terminal()
         print(term.clear)
         with term.cbreak():
-            title = "It's a LinkedIn parser"
-            print(term.move_y(2) + term.center(term.bold_underline(title)))
-
-            prompt = "Enter a number of parse vacancies: "
+            prompt = str(promt)
             print(term.move_y(term.height // 2) + term.center(prompt))
 
             number = ''
