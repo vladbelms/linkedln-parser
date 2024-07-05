@@ -14,15 +14,15 @@ class Menu:
         term = Terminal()
         print(term.clear)
         with term.cbreak():
-            prompt = str(promt)
-            print(term.move_y(term.height // 2) + term.center(prompt))
+            promt = str(promt)
+            print(term.move_y(term.height // 2) + term.center(promt), end='', flush=True)
 
             number = ''
             while True:
                 key = term.inkey()
                 if key.isdigit():
                     number += key
-                    print(term.move_yx(term.height // 2, (term.width // 2 - len(prompt) // 2) + len(prompt)) + number)
+                    print(key, end='', flush=True)
                 elif key.code == term.KEY_ENTER:
                     break
         return int(number)
