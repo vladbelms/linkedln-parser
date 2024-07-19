@@ -81,7 +81,7 @@ class Menu:
                 self.__region = regions[region_index]
                 break
 
-    def all_data(self,list_: list) -> None:
+    def display_menu(self, list_: list, linkedin: 'LinkedIn') -> None:
         current_option = 0
         options = ['Parse', 'Settings', 'Exit']
 
@@ -111,4 +111,3 @@ class Menu:
                     elif current_option == 2:
                         print(self.__term.clear())
                         return
-
