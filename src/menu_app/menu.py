@@ -8,6 +8,7 @@ class Menu:
         self.__region = 'USA'
         self.__vacancies = 5
         self.__term = Terminal()
+        self.__should_exit = False
 
     @property
     def region(self):
@@ -20,6 +21,10 @@ class Menu:
     @property
     def term(self):
         return self.__term
+
+    @property
+    def should_exit(self):
+        return self.__should_exit
 
     def show_list(self, list_: list) -> None:
         start_index = 0
@@ -81,7 +86,7 @@ class Menu:
                 self.__region = regions[region_index]
                 break
 
-    def display_menu(self, list_: list, linkedin: 'LinkedIn') -> None:
+    def display_menu(self) -> None:
         current_option = 0
         options = ['Parse', 'Settings', 'Exit']
 
@@ -105,9 +110,10 @@ class Menu:
                     current_option = (current_option + 1) % len(options)
                 elif val.name == 'KEY_ENTER':
                     if current_option == 0:
-                        self.show_list(list_)
+                        return
                     elif current_option == 1:
                         self.settings()
                     elif current_option == 2:
+                        self.__should_exit = True
                         print(self.__term.clear())
                         return
