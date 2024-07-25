@@ -4,9 +4,9 @@ from blessed import Terminal
 
 class Menu:
 
-    def __init__(self):
-        self.__region = 'USA'
-        self.__vacancies = 5
+    def __init__(self, region: str, vacancies: int) -> None:
+        self.__region = region
+        self.__vacancies = vacancies
         self.__term = Terminal()
         self.__should_exit = False
 
@@ -43,7 +43,7 @@ class Menu:
                     print(self.__term.horizontal_line(self.__term.width))
 
                 print(self.__term.move_y(self.__term.height - 2))
-                print(self.__term.center('Press UP/DOWN to scroll, ENTER to return'))
+                print(self.__term.center('Press ENTER to return'))
 
                 val = self.__term.inkey()
 
