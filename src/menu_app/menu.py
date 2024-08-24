@@ -1,135 +1,171 @@
 import sys
-from blessed import Terminal
+from typing import Optional, Callable, List
+import blessed
 
 
-class Menu:
+class Option:
+    def __init__(self,
+                 name: str,
+                 handler: Callable,
+                 description: Optional[str] = "",
+                 deleting_handler: Optional[Callable] = None
+                 ):
+        self.name = name
+        self.handler = handler
+        self.description = description
+        self.deleting_handler = deleting_handler
 
-    def __init__(self, title: str, options: list[str], settings: dict = None, setting_handlers: dict = None) -> None:
-        self.__title = title
+    def __repr__(self):
+        return f"Option(name ={self.name}, description={self.description})"
+
+
+class KeyMode:
+
+    def __init__(
+            self,
+            options: list[Option],
+            description: str,
+            term: blessed.Terminal = blessed.Terminal()
+    ) -> None:
+
+        self.__description = description
         self.__options = options
-        self.__term = Terminal()
-        self.__should_exit = False
-        self.__settings = settings or {}
-        self.__setting_handlers = setting_handlers or {}
-        self.__current_option = 0
+        self.__term = term
 
     @property
-    def title(self) -> str:
-        return self.__title
+    def description(self) -> str:
+        return self.__description
 
     @property
     def options(self) -> list[str]:
         return self.__options
 
-    @property
-    def term(self):
-        return self.__term
+    def __call__(self):
+        term = self.__term
+        options = self.options
 
-    @property
-    def should_exit(self):
-        return self.__should_exit
+        exit_option = Option(
+            name='Exit',
+            description='Exit the program',
+            handler=sys.exit
+        )
 
-    @property
-    def settings(self):
-        return self.__settings
+        options.append(exit_option)
 
-    @property
-    def setting_handlers(self):
-        return self.__setting_handlers
+        current_option = 0
+        padded_name_len = max([len(option.name) for option in options]) + 2
 
-    def show_list(self, list_: list[dict], title: str = 'List') -> None:
-        start_index = 0
-        end_index = min(len(list_), self.__term.height - 4)
+        use_description = any(option.description for option in options)
+        padded_description_len = max([len(option.description) for option in options], default=0) + 2 if use_description else None
 
-        with self.__term.cbreak(), self.__term.hidden_cursor():
+        with term.fullscreen(), term.cbreak(), term.hidden_cursor():
             while True:
-                print(self.__term.clear())
-                print(self.__term.move_y(2))
-                print(self.__term.move_x(2) + title)
+                print(term.move_yx(0, 0) + term.clear())
 
-                for i in range(start_index, end_index):
-                    dictionary = list_[i]
-                    for key, value in dictionary.items():
-                        print(f"{key}: {value}")
-                    print(self.__term.horizontal_line(self.__term.width))
+                if self.description:
+                    print(term.bold_green(self.description + '\n'))
 
-                print(self.__term.move_y(self.__term.height - 2))
-                print(self.__term.center('Press ENTER to return'))
+                for i, option in enumerate(options):
+                    name = option.name.ljust(padded_name_len)
 
-                val = self.__term.inkey()
+                    if use_description and option.description:
+                        description = option.description.ljust(padded_description_len)
+                        option_text = f'{name} | {description}'
+                    else:
+                        option_text = name
 
-                if val.name == 'KEY_UP' and start_index > 0:
-                    start_index -= 1
-                    end_index -= 1
-                elif val.name == 'KEY_DOWN' and end_index < len(list_):
-                    start_index += 1
-                    end_index += 1
-                elif val.name == 'KEY_ENTER':
+                    if i == current_option:
+                        print(term.green_reverse(f"> {option_text}"))
+                    else:
+                        print(f"  {option_text}")
+
+                key = term.inkey()
+
+                last_option_idx = len(options) - 1
+                if key.name == 'KEY_UP':
+                    current_option = (current_option - 1) % len(options)
+                elif key.name == 'KEY_DOWN':
+                    current_option = (current_option + 1) % len(options)
+                elif key == '\n' or key.name == 'KEY_ENTER':
+                    selected_option = options[current_option]
+                    selected_option.handler()
+                    break
+                elif key == '\n' or key.name == 'KEY_ENTER':
+                    selected_option = options[current_option]
                     break
 
-    def settings_menu(self) -> None:
-        item_keys = list(self.__settings.keys())
-        current_setting_index = 0
+        return selected_option.handler()
 
-        with self.__term.fullscreen(), self.__term.cbreak(), self.__term.hidden_cursor():
+    @staticmethod
+    def screen_option(
+            label: str,
+            description: Optional[str],
+            options: List[Option],
+            deleting_handler: Optional[Callable] = None
+    ) -> Option:
+        def _handler():
+            keymode = KeyMode(options, description)
+            keymode()
+
+        return Option(
+            name=label,
+            handler=_handler,
+            description=description,
+            deleting_handler=deleting_handler
+        )
+
+
+class NumberAdjuster:
+    def __init__(self, start_number: int, term: blessed.Terminal = blessed.Terminal()):
+        self.number = start_number
+        self.term = term
+
+    def adjust(self):
+        with self.term.fullscreen(), self.term.cbreak(), self.term.hidden_cursor():
             while True:
-                print(self.__term.clear())
-                print(self.__term.move_y(self.__term.height // 2 - 2))
-                print(self.__term.center('Settings Menu'))
+                print(self.term.move_yx(0, 0) + self.term.clear())
+                print(f"Current number: {self.number}")
+                print("Press UP to increase, DOWN to decrease, ENTER to confirm, ESC to exit.")
 
-                for i, key in enumerate(item_keys):
-                    value = self.__settings[key]
-                    if i == current_setting_index:
-                        print(self.__term.move_y(self.__term.height // 2 - 1 + i))
-                        print(self.__term.center(self.__term.on_blue(self.__term.bold(f'{key}: {value}'))))
-                    else:
-                        print(self.__term.move_y(self.__term.height // 2 - 1 + i))
-                        print(self.__term.center(f'{key}: {value}'))
+                key = self.term.inkey()
 
-                print(self.__term.move_y(self.__term.height // 2 + len(item_keys)))
-                print(self.__term.center(
-                    'Press UP/DOWN to navigate, LEFT/RIGHT to modify, ENTER to save and return'))
-
-                val = self.__term.inkey()
-
-                if val.name == 'KEY_UP':
-                    current_setting_index = (current_setting_index - 1) % len(item_keys)
-                elif val.name == 'KEY_DOWN':
-                    current_setting_index = (current_setting_index + 1) % len(item_keys)
-                elif val.name == 'KEY_LEFT' or val.name == 'KEY_RIGHT':
-                    key = item_keys[current_setting_index]
-                    handler = self.__setting_handlers.get(key)
-                    if handler:
-                        self.__settings[key] = handler(self.__settings[key], val.name)
-                elif val.name == 'KEY_ENTER':
+                if key.name == 'KEY_UP':
+                    self.number += 1
+                elif key.name == 'KEY_DOWN':
+                    self.number -= 1
+                elif key == '\n' or key.name == 'KEY_ENTER':
+                    return self.number
+                elif key.name == 'KEY_ESCAPE':
                     break
 
-    def display_menu(self) -> None:
-        with self.__term.fullscreen(), self.__term.cbreak(), self.__term.hidden_cursor():
+
+class ListSelector:
+    def __init__(self, items: List[str], term: blessed.Terminal = blessed.Terminal()):
+        self.items = items
+        self.current_index = 0
+        self.term = term
+
+    def select(self):
+        with self.term.fullscreen(), self.term.cbreak(), self.term.hidden_cursor():
             while True:
-                print(self.__term.clear())
-                print(self.__term.move_y(2))
-                print(self.__term.move_x(2) + self.__title)
-                for i, option in enumerate(self.__options):
-                    print(self.__term.move_y(4 + i))
-                    if i == self.__current_option:
-                        print(self.__term.move_x(2) + self.__term.on_blue(self.__term.bold(f'> {option} ')))
+                print(self.term.move_yx(0, 0) + self.term.clear())
+                print("Choose an option:")
+
+                for i, item in enumerate(self.items):
+                    if i == self.current_index:
+                        print(self.term.green_reverse(f"> {item}"))
                     else:
-                        print(self.__term.move_x(2) + f'  {option} ')
+                        print(f"  {item}")
 
-                val = self.__term.inkey()
+                print("\nPress UP/DOWN to choose, ENTER to select, ESC to exit.")
 
-                if val.name == 'KEY_UP':
-                    self.__current_option = (self.__current_option - 1) % len(self.__options)
-                elif val.name == 'KEY_DOWN':
-                    self.__current_option = (self.__current_option + 1) % len(self.__options)
-                elif val.name == 'KEY_ENTER':
-                    return self.__current_option
+                key = self.term.inkey()
 
-    def run(self) -> None:
-        while not self.__should_exit:
-            selected_option = self.display_menu()
-            if selected_option == len(self.__options) - 1:
-                self.__should_exit = True
-            elif selected_option == 1:
-                self.settings_menu()
+                if key.name == 'KEY_UP':
+                    self.current_index = (self.current_index - 1) % len(self.items)
+                elif key.name == 'KEY_DOWN':
+                    self.current_index = (self.current_index + 1) % len(self.items)
+                elif key == '\n' or key.name == 'KEY_ENTER':
+                    return self.items[self.current_index]
+                elif key.name == 'KEY_ESCAPE':
+                    break

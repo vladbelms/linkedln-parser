@@ -1,53 +1,67 @@
-from src import Menu, LinkedIn
+from src import KeyMode , Option , LinkedIn, NumberAdjuster, ListSelector
 
 
-def region_handler(current_value, key_event):
-    regions = ['UK', 'USA', 'EU']
-    current_index = regions.index(current_value)
-    if key_event == 'KEY_LEFT':
-        current_index = (current_index - 1) % len(regions)
-    elif key_event == 'KEY_RIGHT':
-        current_index = (current_index + 1) % len(regions)
-    return regions[current_index]
+def adjust_number():
+    adjuster = NumberAdjuster(start_number=5)
+    final_number = adjuster.adjust()
+    print(f"Final number: {final_number}")
+    return final_number
 
+def choose_country():
+    countries = ["USA", "UK", "EU"]
+    selector = ListSelector(items=countries)
+    selected_country = selector.select()
+    print(f"Selected country: {selected_country}")
+    return selected_country
 
-def vacancies_handler(current_value, key_event):
-    if key_event == 'KEY_LEFT':
-        return max(1, current_value - 1)
-    elif key_event == 'KEY_RIGHT':
-        return current_value + 1
-    return current_value
 
 
 def main():
-    settings = {
-        "Region": "USA",
-        "Vacancies": 5
-    }
+    def show_main_menu():
+        key_mode = KeyMode(options=main_menu_options, description="Select an option:")
+        key_mode()
 
-    setting_handlers = {
-        "Region": region_handler,
-        "Vacancies": vacancies_handler
-    }
+    def show_settings_menu():
+        key_mode = KeyMode(options=settings_menu_options, description="Settings:")
+        key_mode()
 
-    menu = Menu(
-        title="Generic Application",
-        options=["Start", "Settings", "Exit"],
-        settings=settings,
-        setting_handlers=setting_handlers
-    )
-    while True:
-        selected_option = menu.display_menu()
-        if selected_option == 2:
-            break
-        elif selected_option == 1:
-            menu.settings_menu()
-        elif selected_option == 0:
-            region = menu.settings["Region"]
-            vacancies = menu.settings["Vacancies"]
-            linkedin = LinkedIn([""],[region])
-            list_ = linkedin.get_data(vacancies)
-            menu.show_list(list_, title="Vacancies List")
+    def get_linkedin():
+        return LinkedIn([""], [choose_country()])
+
+    def parsing_data_handler():
+        linkedin = get_linkedin()
+        data = linkedin.get_data(adjust_number())
+        for i in range(0, adjust_number()):
+            dictionary = data[i]
+            for key, value in dictionary.items():
+                print(f"{key}: {value}")
+
+    main_menu_options = [
+        Option(
+            name="Parsing data",
+            handler= parsing_data_handler
+        ),
+        Option(
+            name="Settings",
+            handler=show_settings_menu
+        ),
+    ]
+    settings_menu_options = [
+        Option(
+            name="Country",
+            handler= choose_country
+        ),
+        Option(
+            name="Vacancies",
+            handler=adjust_number
+        ),
+        Option(
+            name="Exit",
+            handler= show_main_menu
+        )
+    ]
+
+    show_main_menu()
 
 
 if __name__ == '__main__':
